@@ -1,0 +1,15 @@
+// Shared settings for the iPhone and Apple Watch apps.
+//
+// To sign with your own Apple ID, create Apple/Local.xcconfig (it is ignored
+// by git) with two lines:
+//
+//   BUNDLE_ID_PREFIX = com.yourname
+//   DEVELOPMENT_TEAM = ABCDE12345
+//
+// Your Team ID is shown in Xcode > Settings > Accounts, or just pick the Team
+// in Signing & Capabilities.
+
+BUNDLE_ID_PREFIX = com.example
+DEVELOPMENT_TEAM =
+
+#include? "Local.xcconfig"

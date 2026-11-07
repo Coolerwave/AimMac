@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="75%">
+      <stop offset="0" stop-color="#16213f"/>
+      <stop offset="0.55" stop-color="#0a0f22"/>
+      <stop offset="1" stop-color="#04060d"/>
+    </radialGradient>
+    <linearGradient id="ring" gradientUnits="userSpaceOnUse" x1="150" y1="150" x2="874" y2="874">
+      <stop offset="0" stop-color="#5cf2b8"/>
+      <stop offset="0.55" stop-color="#4fd8e8"/>
+      <stop offset="1" stop-color="#7aa7ff"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#5cf2b8" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#5cf2b8" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <circle cx="512" cy="512" r="330" fill="url(#glow)"/>
+  <!-- reticle, glow pass -->
+  <g fill="none" stroke="url(#ring)" stroke-linecap="round" filter="url(#soft)" opacity="0.8">
+    <circle cx="512" cy="512" r="300" stroke-width="34"/>
+  </g>
+  <!-- reticle -->
+  <g fill="none" stroke="url(#ring)" stroke-linecap="round">
+    <circle cx="512" cy="512" r="300" stroke-width="34"/>
+    <circle cx="512" cy="512" r="168" stroke-width="16" opacity="0.55"/>
+    <line x1="512" y1="150" x2="512" y2="262" stroke-width="34"/>
+    <line x1="512" y1="762" x2="512" y2="874" stroke-width="34"/>
+    <line x1="150" y1="512" x2="262" y2="512" stroke-width="34"/>
+    <line x1="762" y1="512" x2="874" y2="512" stroke-width="34"/>
+  </g>
+  <!-- cursor arrow, tip at the center -->
+  <g transform="translate(512 512)" filter="url(#shadow)">
+    <path d="M0 0 L0 236 L58 180 L100 272 L146 252 L104 162 L182 162 Z"
+          fill="#ffffff" stroke="#0a0f22" stroke-width="16" stroke-linejoin="round"/>
+  </g>
+</svg>

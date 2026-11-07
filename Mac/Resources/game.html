@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbit Pop</title>
+<style>
+  :root { --bg:#05060d; --ink:#e9f3ff; --dim:#7d8aa6; --mint:#5cf2b8; --pink:#ff5fa2; --gold:#ffd166; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--ink); overflow:hidden;
+              font-family: ui-rounded, "SF Pro Rounded", system-ui, sans-serif; cursor:none; user-select:none; }
+  canvas { display:block; width:100vw; height:100vh; }
+  #hud { position:fixed; inset:18px 24px auto 24px; display:flex; justify-content:space-between; pointer-events:none;
+         font-variant-numeric: tabular-nums; letter-spacing:.04em; }
+  .chip { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:10px 16px; }
+  .chip b { font-size:26px; display:block; }
+  .chip span { font-size:11px; color:var(--dim); text-transform:uppercase; }
+  #overlay { position:fixed; inset:0; display:grid; place-items:center; text-align:center; pointer-events:none; }
+  #overlay h1 { font-size:clamp(48px,9vw,120px); margin:0; letter-spacing:-.03em;
+                background:linear-gradient(90deg,var(--mint),#7aa7ff,var(--pink)); -webkit-background-clip:text; color:transparent; }
+  #overlay p { color:var(--dim); font-size:18px; margin:10px 0 0; }
+  #overlay .big { color:var(--ink); font-size:22px; margin-top:28px; animation:pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity:.35 } }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud" hidden>
+  <div class="chip"><span>Score</span><b id="score">0</b></div>
+  <div class="chip"><span>Combo</span><b id="combo">×1</b></div>
+  <div class="chip"><span>Time</span><b id="time">45</b></div>
+</div>
+<div id="overlay">
+  <div>
+    <h1>Orbit Pop</h1>
+    <p>Aim with your iPhone or Apple Watch. Pop the rings before they collapse.</p>
+    <p>Center hits score double · gold rings ×3 · misses break your combo</p>
+    <p id="best"></p>
+    <p class="big">Click anywhere to start · F for full screen</p>
+  </div>
+</div>
+<script>
+const cv = document.getElementById('c'), cx = cv.getContext('2d');
+const $ = id => document.getElementById(id);
+let W, H, DPR;
+function resize() {
+  DPR = window.devicePixelRatio || 1;
+  W = innerWidth; H = innerHeight;
+  cv.width = W * DPR; cv.height = H * DPR;
+  cx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+addEventListener('resize', resize); resize();
+
+function load(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }
+function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+
+const ROUND = 45;
+let state = 'menu', score = 0, combo = 1, hits = 0, shots = 0, tLeft = ROUND, last = 0, spawnT = 0;
+let rings = [], sparks = [], floaters = [];
+let best = load('orbitpop.best', 0);
+let mouse = { x: W / 2, y: H / 2 };
+showBest();
+
+function showBest() { $('best').textContent = best ? `Best: ${best}` : ''; }
+
+// starfield
+const stars = Array.from({ length: 160 }, () => ({ x: Math.random(), y: Math.random(), z: Math.random() }));
+
+function spawn() {
+  const gold = Math.random() < 0.08;
+  const r = gold ? 34 : 40 + Math.random() * 26;
+  const m = r + 40;
+  rings.push({
+    x: m + Math.random() * (W - 2 * m), y: m + 70 + Math.random() * (H - 2 * m - 70),
+    vx: (Math.random() - .5) * 60, vy: (Math.random() - .5) * 60,
+    r, life: 0, ttl: gold ? 2.2 : 3.4 - Math.min(1.6, (ROUND - tLeft) / 25), gold,
+    hue: gold ? 45 : [160, 215, 330][Math.floor(Math.random() * 3)],
+  });
+}
+
+function burst(x, y, hue, n) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, s = 80 + Math.random() * 320;
+    sparks.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 0, ttl: .5 + Math.random() * .5, hue });
+  }
+}
+
+function float(x, y, text, color) { floaters.push({ x, y, text, color, life: 0 }); }
+
+function start() {
+  state = 'play'; score = 0; combo = 1; hits = 0; shots = 0; tLeft = ROUND;
+  rings = []; sparks = []; floaters = []; spawnT = 0;
+  $('overlay').hidden = true; $('hud').hidden = false;
+}
+
+function end() {
+  state = 'over';
+  if (score > best) { best = score; save('orbitpop.best', best); }
+  const acc = shots ? Math.round(hits / shots * 100) : 0;
+  $('overlay').querySelector('h1').textContent = score;
+  $('overlay').querySelectorAll('p')[0].textContent = `${hits} rings · ${acc}% accuracy`;
+  $('overlay').querySelectorAll('p')[1].textContent = score > 0 && score >= best ? 'New best!' : '';
+  showBest();
+  $('overlay').querySelector('.big').textContent = 'Click to play again';
+  $('overlay').hidden = false; $('hud').hidden = true;
+}
+
+addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+addEventListener('keydown', e => {
+  if (e.key === 'f' || e.key === 'F') {
+    if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.();
+  }
+});
+addEventListener('contextmenu', e => e.preventDefault());
+addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  if (state !== 'play') { start(); return; }
+  shots++;
+  const x = e.clientX, y = e.clientY;
+  let hit = null, bestD = Infinity;
+  for (const r of rings) {
+    const d = Math.hypot(r.x - x, r.y - y), rr = r.r * (1 - r.life / r.ttl * .55);
+    if (d < rr + 6 && d < bestD) { hit = r; bestD = d; }
+  }
+  if (!hit) {
+    combo = 1;
+    float(x, y, 'miss', 'rgba(255,255,255,.4)');
+    return;
+  }
+  const rr = hit.r * (1 - hit.life / hit.ttl * .55);
+  const center = bestD < rr * .35;
+  let pts = 10 * combo * (center ? 2 : 1) * (hit.gold ? 3 : 1);
+  score += pts; hits++; combo = Math.min(combo + 1, 8);
+  burst(hit.x, hit.y, hit.hue, center ? 46 : 26);
+  float(hit.x, hit.y, (center ? 'BULLSEYE +' : '+') + pts, `hsl(${hit.hue} 95% 70%)`);
+  rings.splice(rings.indexOf(hit), 1);
+});
+
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000 || 0); last = now;
+
+  // background
+  cx.fillStyle = '#05060d'; cx.fillRect(0, 0, W, H);
+  const g = cx.createRadialGradient(W * .5, H * 1.1, 0, W * .5, H * 1.1, H * 1.2);
+  g.addColorStop(0, 'rgba(92,242,184,.10)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+  for (const s of stars) {
+    s.y += dt * (.004 + s.z * .02); if (s.y > 1) s.y -= 1;
+    cx.fillStyle = `rgba(200,220,255,${.15 + s.z * .5})`;
+    cx.fillRect(s.x * W, s.y * H, 1 + s.z * 1.5, 1 + s.z * 1.5);
+  }
+
+  if (state === 'play') {
+    tLeft -= dt;
+    if (tLeft <= 0) { tLeft = 0; end(); }
+    spawnT -= dt;
+    const maxRings = 3 + Math.floor((ROUND - tLeft) / 9);
+    if (spawnT <= 0 && rings.length < maxRings) { spawn(); spawnT = .45 + Math.random() * .5; }
+  }
+
+  // rings
+  for (let i = rings.length - 1; i >= 0; i--) {
+    const r = rings[i];
+    r.life += dt; r.x += r.vx * dt; r.y += r.vy * dt;
+    if (r.x < r.r || r.x > W - r.r) r.vx *= -1;
+    if (r.y < r.r + 70 || r.y > H - r.r) r.vy *= -1;
+    if (r.life >= r.ttl) {
+      rings.splice(i, 1);
+      if (state === 'play') { combo = 1; float(r.x, r.y, 'gone', 'rgba(255,255,255,.35)'); }
+      continue;
+    }
+    const k = r.life / r.ttl, rr = r.r * (1 - k * .55);
+    const col = a => `hsla(${r.hue} 95% 65% / ${a})`;
+    cx.save();
+    cx.shadowColor = col(.9); cx.shadowBlur = 24;
+    cx.lineWidth = 3; cx.strokeStyle = col(.95);
+    cx.beginPath(); cx.arc(r.x, r.y, rr, 0, Math.PI * 2); cx.stroke();
+    cx.restore();
+    cx.lineWidth = 1.5; cx.strokeStyle = col(.45);
+    cx.beginPath(); cx.arc(r.x, r.y, rr * .55, 0, Math.PI * 2); cx.stroke();
+    cx.fillStyle = col(.9);
+    cx.beginPath(); cx.arc(r.x, r.y, Math.max(2.5, rr * .12), 0, Math.PI * 2); cx.fill();
+    // countdown arc
+    cx.lineWidth = 2; cx.strokeStyle = 'rgba(255,255,255,.35)';
+    cx.beginPath(); cx.arc(r.x, r.y, rr + 8, -Math.PI / 2, -Math.PI / 2 + (1 - k) * Math.PI * 2); cx.stroke();
+  }
+
+  // sparks
+  for (let i = sparks.length - 1; i >= 0; i--) {
+    const p = sparks[i]; p.life += dt;
+    if (p.life > p.ttl) { sparks.splice(i, 1); continue; }
+    p.vx *= .96; p.vy = p.vy * .96 + 200 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+    cx.fillStyle = `hsla(${p.hue} 95% 70% / ${1 - p.life / p.ttl})`;
+    cx.fillRect(p.x, p.y, 3, 3);
+  }
+
+  // floating text
+  cx.textAlign = 'center'; cx.font = '600 18px ui-rounded, system-ui';
+  for (let i = floaters.length - 1; i >= 0; i--) {
+    const f = floaters[i]; f.life += dt;
+    if (f.life > .9) { floaters.splice(i, 1); continue; }
+    cx.globalAlpha = 1 - f.life / .9; cx.fillStyle = f.color;
+    cx.fillText(f.text, f.x, f.y - f.life * 50);
+    cx.globalAlpha = 1;
+  }
+
+  // reticle
+  cx.strokeStyle = 'rgba(233,243,255,.8)'; cx.lineWidth = 1.5;
+  cx.beginPath(); cx.arc(mouse.x, mouse.y, 14, 0, Math.PI * 2); cx.stroke();
+  cx.beginPath();
+  cx.moveTo(mouse.x - 22, mouse.y); cx.lineTo(mouse.x - 8, mouse.y);
+  cx.moveTo(mouse.x + 8, mouse.y); cx.lineTo(mouse.x + 22, mouse.y);
+  cx.moveTo(mouse.x, mouse.y - 22); cx.lineTo(mouse.x, mouse.y - 8);
+  cx.moveTo(mouse.x, mouse.y + 8); cx.lineTo(mouse.x, mouse.y + 22);
+  cx.stroke();
+
+  if (state === 'play') {
+    $('score').textContent = score;
+    $('combo').textContent = '×' + combo;
+    $('time').textContent = Math.ceil(tLeft);
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
