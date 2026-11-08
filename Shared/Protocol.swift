@@ -83,6 +83,8 @@ struct PacketReader {
         return PacketKind(rawValue: b)
     }
 
+    var remaining: Int { bytes.count - i }
+
     /// Call once before reading fields to skip the kind byte.
     mutating func skipKind() { i = 1 }
 

@@ -217,8 +217,10 @@ final class PointerEngine {
     }
 
     func scroll(dx: Double, dy: Double) {
+        // Reject non-finite and out-of-range values before converting network input.
+        guard let x = Int32(exactly: dx.rounded()), let y = Int32(exactly: dy.rounded()) else { return }
         let ev = CGEvent(scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 2,
-                         wheel1: Int32(dy.rounded()), wheel2: Int32(dx.rounded()), wheel3: 0)
+                         wheel1: y, wheel2: x, wheel3: 0)
         ev?.post(tap: .cghidEventTap)
     }
 
