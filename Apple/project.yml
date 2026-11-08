@@ -35,8 +35,12 @@ targets:
       properties:
         CFBundleDisplayName: AimMac
         UILaunchScreen: {}
-        UIRequiresFullScreen: true
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
         UIApplicationSupportsIndirectInputEvents: true
         NSBluetoothAlwaysUsageDescription: AimMac connects to your Mac over Bluetooth to move the pointer.
         NSMotionUsageDescription: AimMac uses motion to aim the pointer.
@@ -44,7 +48,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_ID_PREFIX).aimmac
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        TARGETED_DEVICE_FAMILY: "1"
+        TARGETED_DEVICE_FAMILY: "1,2"
         GENERATE_INFOPLIST_FILE: NO
 
   AimMacWatch:
