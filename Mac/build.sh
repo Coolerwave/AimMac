@@ -17,6 +17,7 @@ swiftc -O \
 
 cp Info.plist "$APP/Contents/Info.plist"
 cp Resources/game.html "$APP/Contents/Resources/game.html"
+cp Resources/duck.html "$APP/Contents/Resources/duck.html"
 cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 
 # Ad-hoc signature. After every rebuild macOS may forget the Accessibility

@@ -101,6 +101,7 @@ struct WatchPad: View {
                 small(session.link.paused ? "play.fill" : "pause.fill", session.link.paused ? "Go" : "Pause") {
                     session.setPaused(!session.link.paused)
                 }
+                small("gearshape", "More") { showSettings = true }
             }
         }
         .padding(.horizontal, 4)
@@ -112,8 +113,8 @@ struct WatchPad: View {
             lastCrown = new
             session.link.scroll(dx: 0, dy: -d * 6)
         }
-        .onLongPressGesture(minimumDuration: 1.2) { showSettings = true }
         .sheet(isPresented: $showSettings) { WatchSettings() }
+        .onDisappear { session.release() }
     }
 
     private var pad: some View {
@@ -125,7 +126,7 @@ struct WatchPad: View {
                 VStack(spacing: 2) {
                     Image(systemName: paused ? "pause.circle" : (active ? "hand.point.up.left.fill" : "dot.circle.and.hand.point.up.left.fill"))
                         .font(.title3)
-                    Text(paused ? "Paused" : (active ? "Holding" : "Tap · Hold to drag"))
+                    Text(paused ? "Paused" : (active ? "Click!" : "Tap to click"))
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -135,11 +136,9 @@ struct WatchPad: View {
                     .stroke(active ? mint : Color.white.opacity(0.15), lineWidth: 1)
             )
             .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { _ in session.press() }
-                    .onEnded { _ in session.release() }
-            )
+            // A tap is a complete click (down and up sent together), so the
+            // cursor can never stay frozen waiting for a "release" that got lost.
+            .onTapGesture { session.tap() }
     }
 
     private func small(_ icon: String, _ label: String, action: @escaping () -> Void) -> some View {

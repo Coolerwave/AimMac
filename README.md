@@ -6,17 +6,17 @@ Turn your **iPhone** or **Apple Watch** into a pointer for your Mac. Aim it at t
 
 No Wi-Fi and no servers: the phone or watch talks straight to the Mac over Bluetooth.
 
-> Status: the Mac app and the iPhone app work (tested on iOS 27.2). The Apple Watch app is written but has not been tested on a real watch yet.
+> Status: the Mac app and the iPhone app work (tested on iOS 27.2). The Apple Watch app works too (tested on an Apple Watch Ultra with watchOS 26.6), but it is new, so expect rough edges.
 
 ## What it does
 
 - **Point like a laser.** The cursor goes where the top edge of your device points (12 o'clock on the watch). Up/down comes from gravity, so it never drifts. Works across all your displays.
-- **Tap** to click, **double-tap** to double-click, **hold** to drag, a **right-click** button, and scrolling (Digital Crown on the watch, a scroll strip on the phone).
+- **Tap** to click, **double-tap** to double-click, a **right-click** button, and scrolling (Digital Crown on the watch, a scroll strip on the phone). On the iPhone you can also **hold** to drag; the watch only clicks.
 - **Trackpad mode on the iPhone.** Lay it on the table and slide a finger, with a drag lock for moving windows.
 - **Center** re-aims the middle of the screen. **Pause** frees the cursor for your real trackpad.
 - **Pairing with approval.** The first time a device connects, the Mac asks you to allow it. Devices you didn't allow can't move the cursor.
 - **Notch panel.** Hover the notch (or the middle of the menu bar) to see the connected device, its battery, a live aim map and quick buttons. Pin it to keep it open.
-- **Orbit Pop**, a small target game to try it on.
+- Two small games to try it on: **Duck Shoot** and **Orbit Pop**.
 
 ## Requirements
 
@@ -70,7 +70,11 @@ Hold the device like a remote with its top edge toward the screen. Point at the 
 
 Speed, smoothing and axis inversion live in the AimMac menu on the Mac.
 
-Watch tips: on the iPhone's Watch app turn off **Passcode › Wrist Detection** if you hold the watch in your hand, set **Display & Brightness › Wake Duration** to 70 seconds, and **General › Return to Clock › AimMac** to one hour. Long-press the watch screen for settings and unpairing.
+Watch tips: on the iPhone's Watch app turn off **Passcode › Wrist Detection** if you hold the watch in your hand, set **Display & Brightness › Wake Duration** to 70 seconds, and **General › Return to Clock › AimMac** to one hour. Tap **More** on the watch for settings and unpairing.
+
+## Duck Shoot
+
+Choose **Play Duck Shoot** in the menu bar menu. Ducks fly across a sunset sky; tap to fire, or keep the crosshair on a duck for a third of a second and it fires by itself (press **A** to turn auto-fire on or off). Headshots score double, golden ducks five times, and every hit in a row raises your combo. A different dog pops out of the grass after each hit, and laughs when a duck gets away. Press **F** for full screen.
 
 ## Orbit Pop
 

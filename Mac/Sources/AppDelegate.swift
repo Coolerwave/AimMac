@@ -113,6 +113,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, Receiv
         item("Invert up/down", #selector(toggleInvY), on: invY)
         menu.addItem(.separator())
         item("Play the target game", #selector(openGame))
+        item("Play Duck Shoot", #selector(openDuckGame))
         item("Forget paired devices (\(receiver.trustedCount))", #selector(forget), enabled: receiver.trustedCount > 0)
         menu.addItem(.separator())
         let quit = NSMenuItem(title: "Quit AimMac", action: #selector(quitApp), keyEquivalent: "q")
@@ -166,8 +167,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, Receiv
     @objc func forget() { receiver.forgetAll() }
     @objc func quitApp() { NSApp.terminate(nil) }
 
-    @objc func openGame() {
-        guard let url = Bundle.main.url(forResource: "game", withExtension: "html") else {
+    @objc func openGame() { openPage("game") }
+    @objc func openDuckGame() { openPage("duck") }
+
+    func openPage(_ name: String) {
+        guard let url = Bundle.main.url(forResource: name, withExtension: "html") else {
             NSSound.beep()
             return
         }

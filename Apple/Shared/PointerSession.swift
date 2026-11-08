@@ -38,17 +38,33 @@ final class PointerSession: ObservableObject {
         update()
     }
 
+    private var holdToken = 0
+
     func press() {
         guard !pressing else { return }
         pressing = true
+        holdToken += 1
+        let token = holdToken
         DeviceInfo.haptic()
         link.press()
+        // Safety net: never stay "held" for more than 15 seconds.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 15) { [weak self] in
+            if let self, self.pressing, self.holdToken == token { self.release() }
+        }
     }
 
     func release() {
         guard pressing else { return }
         pressing = false
         link.release()
+    }
+
+    /// A complete click: down, then up a moment later. Used by the watch, where a
+    /// lost "up" would leave the Mac cursor frozen.
+    func tap() {
+        guard !pressing else { return }
+        press()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in self?.release() }
     }
 
     func rightClick() {
