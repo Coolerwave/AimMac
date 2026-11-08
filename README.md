@@ -36,6 +36,12 @@ The first launch asks for **Bluetooth** and **Accessibility** (System Settings â
 
 After a rebuild macOS may forget the Accessibility permission. If the cursor stops moving, turn AimMac off and on again in that list.
 
+Run the Mac packet regression checks with `bash Mac/test.sh` from the repository
+root. They require no Bluetooth device or Accessibility permission and cover
+valid control packets, truncation, invalid flags, non-finite numbers and scroll
+overflow. The receiver ignores malformed control packets rather than applying
+partial input.
+
 ## 2. iPhone and Apple Watch apps
 
 With [XcodeGen](https://github.com/yonaskolb/XcodeGen):

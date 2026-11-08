@@ -1,17 +1,6 @@
 import AppKit
 import CoreBluetooth
 
-enum InputEvent {
-    case aim(t: Double, az: Double, el: Double)
-    case press(t: Double)
-    case release(t: Double)
-    case right(t: Double)
-    case scroll(dx: Double, dy: Double)
-    case move(dx: Double, dy: Double)
-    case center
-    case pause(Bool)
-}
-
 struct Peer {
     let central: CBCentral
     var deviceID: UUID?
@@ -188,33 +177,12 @@ final class Receiver: NSObject, CBPeripheralManagerDelegate {
         // Everything below needs an approved device.
         guard let peer = peers[key], peer.state == .approved else { return }
 
-        let event: InputEvent?
-        switch kind {
-        case .aim:
-            if let t = r.f64(), let az = r.f32(), let el = r.f32() {
-                event = .aim(t: t, az: Double(az), el: Double(el))
-            } else { event = nil }
-        case .press:
-            event = r.f64().map { InputEvent.press(t: $0) }
-        case .release:
-            event = r.f64().map { InputEvent.release(t: $0) }
-        case .right:
-            event = r.f64().map { InputEvent.right(t: $0) }
-        case .scroll:
-            if let dx = r.f32(), let dy = r.f32() { event = .scroll(dx: Double(dx), dy: Double(dy)) } else { event = nil }
-        case .move:
-            if let dx = r.f32(), let dy = r.f32() { event = .move(dx: Double(dx), dy: Double(dy)) } else { event = nil }
-        case .center:
-            event = .center
-        case .pause:
-            let on = (r.u8() ?? 0) != 0
+        guard let event = InputEvent.decode(data) else { return }
+        if case let .pause(on) = event {
             peers[key]?.paused = on
-            event = .pause(on)
             delegate?.receiverDidChange(self)
-        case .hello, .info:
-            event = nil
         }
-        if let e = event, let p = peers[key] { delegate?.receiver(self, peer: p, event: e) }
+        if let peer = peers[key] { delegate?.receiver(self, peer: peer, event: event) }
     }
 
     private func askTrust(_ key: String) {

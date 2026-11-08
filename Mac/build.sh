@@ -23,6 +23,9 @@ cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 # Ad-hoc signature. After every rebuild macOS may forget the Accessibility
 # permission: turn AimMac off and on again in
 # System Settings > Privacy & Security > Accessibility.
+# Finder/file-provider metadata can make codesign reject a freshly built bundle.
+# Only clear attributes on this generated output, never on the source resources.
+xattr -cr "$APP"
 codesign --force --deep --sign - "$APP" >/dev/null
 
 echo "Built $APP"
