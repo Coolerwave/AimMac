@@ -1,95 +1,50 @@
-<p align="center"><img src="docs/icon.png" width="160" alt="AimMac icon"></p>
+# Ping Pong
 
-# AimMac
+A one-page table tennis game for the browser, made to show off [AimMac](https://github.com/Coolerwave/AimMac). Your iPhone, Apple Watch or Android phone is the paddle: AimMac moves the Mac cursor where you aim, and the game follows the cursor.
 
-Turn your **iPhone** or **Apple Watch** into a pointer for your Mac. Aim it at the screen to move the cursor, tap to click, hold to drag.
+**Play it here:** https://coolerwave.github.io/AimMac/PingPong/
 
-No Wi-Fi and no servers: the phone or watch talks straight to the Mac over Bluetooth.
+It also works with a normal mouse or trackpad.
 
-> Status: the Mac app and the iPhone app work (tested on iOS 27.2). The Apple Watch app works too (tested on an Apple Watch Ultra with watchOS 26.6), but it is new, so expect rough edges.
+## How to play
 
-## What it does
+1. Start the AimMac receiver on the Mac and connect your phone or watch.
+2. Open the game in a browser and press **F** for full screen.
+3. Pick an opponent, then click to serve.
+4. Aim to move the paddle and swing to hit. A faster swing means a harder shot, and a high ball can be smashed.
 
-- **Point like a laser.** The cursor goes where the top edge of your device points (12 o'clock on the watch). Up/down comes from gravity, so it never drifts. Works across all your displays.
-- **Tap** to click, **double-tap** to double-click, a **right-click** button, and scrolling (Digital Crown on the watch, a scroll strip on the phone). On the iPhone you can also **hold** to drag; the watch only clicks.
-- **Trackpad mode on the iPhone.** Lay it on the table and slide a finger, with a drag lock for moving windows.
-- **Center** re-aims the middle of the screen. **Pause** frees the cursor for your real trackpad.
-- **Pairing with approval.** The first time a device connects, the Mac asks you to allow it. Devices you didn't allow can't move the cursor.
-- **Notch panel.** Hover the notch (or the middle of the menu bar) to see the connected device, its battery, a live aim map and quick buttons. Pin it to keep it open.
-- Two small games to try it on: **Duck Shoot** and **Orbit Pop**.
+First to 11, win by 2.
 
-## Requirements
+## Opponents
 
-- Mac with macOS 14 or later, Apple silicon or Intel, with Bluetooth
-- iPhone with iOS 17 or later and/or Apple Watch with watchOS 10 or later
-- Xcode 15 or later (use a version whose SDK matches your iPhone's iOS)
+Seven opponents, each with their own speed, power, shot placement, celebrations and trash talk: The Champ, Alice Huang, Jeff, Elon, Jensen, Tim and Zuck.
 
-## 1. Mac receiver
+They move around the table, switch between forehand, backhand, lunge and ready stances, jump for high balls, stretch for the ones they miss, and sulk under a rain cloud when you score.
 
-```bash
-cd Mac
-chmod +x build.sh
-./build.sh run
-```
+**Boss: Jensen & Alice.** A doubles team, two against you. Like real doubles they hit in turn: one returns, steps aside, and the partner takes the next ball. A glow under their feet shows whose turn it is.
 
-The first launch asks for **Bluetooth** and **Accessibility** (System Settings › Privacy & Security › Accessibility). Accessibility is what lets it move the cursor. Allow both.
+## The stock market screen
 
-After a rebuild macOS may forget the Accessibility permission. If the cursor stops moving, turn AimMac off and on again in that list.
+Every opponent has a ticker on the big screen above the court. When they score on you their stock pumps, when they miss it dumps. Three points in a row trigger a bull run or a trading halt, a smash causes a flash crash, and the match ends with TO THE MOON or MARGIN CALL. Prices and headlines are made up for fun.
 
-## 2. iPhone and Apple Watch apps
+## Keys
 
-With [XcodeGen](https://github.com/yonaskolb/XcodeGen):
+| Key | What it does |
+| --- | --- |
+| Click or Space | Start, serve, play again |
+| 1 / 2 / 3 | Easy / Normal / Hard |
+| F | Full screen |
+| Esc | Back to the opponent menu |
 
-```bash
-brew install xcodegen
-cd Apple
-xcodegen
-open AimMac.xcodeproj
-```
+**Easy** gives a bigger paddle, a slower ball and a dashed ring that shows where the ball will arrive.
 
-1. Sign with your Apple ID: create `Apple/Local.xcconfig` with your bundle prefix and Team ID (see `Apple/Config.xcconfig`), or just pick your Team in **Signing & Capabilities**. A free Apple ID works.
-2. Choose your iPhone (or your watch) as the run destination and press **⌘R**. The first time, turn on **Developer Mode** on the iPhone (Settings › Privacy & Security) and trust your developer profile (Settings › General › VPN & Device Management).
-3. Open AimMac on the device, tap **Pair** next to your Mac, then click **Allow** on the Mac.
+## Notes
 
-With a free Apple ID, apps you install from Xcode stop opening after 7 days; just run them again from Xcode.
-
-<details>
-<summary>Without XcodeGen</summary>
-
-1. Xcode › File › New › Project › iOS › App, name it `AimMac`, SwiftUI.
-2. File › New › Target › watchOS › App, name it `AimMacWatch`, as a watch-only app.
-3. Delete the generated `…App.swift` and `ContentView.swift` files from both targets.
-4. Drag in `Apple/iOS` (iPhone target only), `Apple/Watch` (watch target only), and `Apple/Shared` plus `Shared/Protocol.swift` (both targets).
-5. In each target's **Info** tab add `Privacy - Bluetooth Always Usage Description` and `Privacy - Motion Usage Description`.
-
-</details>
-
-## Using it
-
-Hold the device like a remote with its top edge toward the screen. Point at the middle of the screen and tap **Center**.
-
-Speed, smoothing and axis inversion live in the AimMac menu on the Mac.
-
-Watch tips: on the iPhone's Watch app turn off **Passcode › Wrist Detection** if you hold the watch in your hand, set **Display & Brightness › Wake Duration** to 70 seconds, and **General › Return to Clock › AimMac** to one hour. Tap **More** on the watch for settings and unpairing.
-
-## Duck Shoot
-
-Choose **Play Duck Shoot** in the menu bar menu. Ducks fly across a sunset sky; tap to fire, or keep the crosshair on a duck for a third of a second and it fires by itself (press **A** to turn auto-fire on or off). Headshots score double, golden ducks five times, and every hit in a row raises your combo. A different dog pops out of the grass after each hit, and laughs when a duck gets away. Press **F** for full screen.
-
-## Orbit Pop
-
-Click **Game** in the notch panel or **Play the target game** in the menu. Press **F** for full screen. Rings shrink and fade; pop them before they collapse. Center hits score double, gold rings triple, and every hit in a row raises your combo.
-
-## How it works
-
-- **Device** (`Apple/`): reads gravity and the gyroscope 100 times a second. Up/down is the angle of the top edge above the horizon; left/right adds up turns around the true vertical. Each sample carries the device's timestamp.
-- **Mac** (`Mac/`): projects the aim onto the screen like a laser hitting a wall, smooths it with a [1€ filter](https://gery.casiez.net/1euro/) using the device's timestamps, and eases the cursor toward it 240 times a second on its own thread. A click lands where you were aiming the moment your finger touched the screen, so the tap's jolt doesn't move it.
-- **Bluetooth**: the Mac advertises a service; the device connects and writes small packets. The protocol is documented at the top of `Shared/Protocol.swift`.
-
-## Credits
-
-Inspired by [WatchPointer](https://github.com/umarz317/WatchPointer) by umarz317. AimMac is a separate implementation written from scratch.
+- One HTML file, no build step and no dependencies. Download `index.html` and open it, or use the link above.
+- Your opponent, difficulty and best winning margin are saved in the browser.
+- Add `?auto` to the address for a demo where the game plays itself, and `?opp=elon` (or `alice`, `jeff`, `jensen`, `tim`, `zuck`, `champ`, `boss`) to jump straight to an opponent.
+- The characters are cartoon parodies. This is a fan project and is not affiliated with or endorsed by any of the people or companies it pokes fun at.
 
 ## License
 
-MIT
+MIT, same as [AimMac](https://github.com/Coolerwave/AimMac).
